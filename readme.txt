@@ -1,3 +1,5 @@
+#now contains the ability to tarball with xz, gz, and bz2.
+
 #paramiko uses an sftp/scp client to perform filetransfers 
 
 #a python3 script to:
