@@ -1,0 +1,4 @@
+paramiko
+python3
+python-pyxattr
+posix1e ( for python3 )
