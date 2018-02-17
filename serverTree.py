@@ -15,6 +15,7 @@ import sys
 sys.path.insert(0,os.path.realpath('./plugins'))
 import colors
 from archiveLib import tarball
+from crypto import theCryptKeeper as tck
 color=colors.colors()
 
 class ssh:
@@ -265,6 +266,7 @@ class run:
     tarball_compression="gz"
     compModes=['xz','gz','bz2']
     tarballMessage=''
+    encrypt=''
     def pathExpand(self,path):
         return os.path.realpath(os.path.expanduser(path))
 
@@ -369,6 +371,12 @@ class run:
                 Zip.oPath=self.zipName
                 Zip.SRC=src
                 Zip.zipper()
+            if self.encrypt != '':
+                ec=tck()
+                key=ec.adjustKey(self.encrypt)
+                newZipName=self.zipName+".aes"
+                ec.encrypt(key,self.zipName,newZipName)
+                self.zipName=newZipName
             send=ssh()
             send.host=self.host
             send.forcePassword=self.forcePassword
@@ -398,6 +406,7 @@ class run:
         parser.add_argument("-F","--force-password")
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
+        parser.add_argument("-e","--encrypt-archive")
         options=parser.parse_args()
 
         if options.dst:
@@ -423,6 +432,8 @@ class run:
             self.username=options.username
         if options.password:
             self.password=options.password
+        if options.encrypt_archive:
+            self.encrypt=options.encrypt_archive
         if options.force_password:
             self.forcePassword=options.force_password
         else:
