@@ -12,10 +12,19 @@ except:
 from Crypto.Cipher import AES
 
 class theCryptKeeper:
-    def adjustKey(self,key):
-        keyLen=16-len(key)
+    def adjuster(self,key,charLen):
+        keyLen=charLen-len(key)
         keyPad=chr(keyLen)
-        key=key+(keyLen*keyPad)
+        key+=(keyLen*keyPad)
+        return key
+
+    def adjustKey(self,key):
+        if len(key) < 16:
+            key=self.adjuster(key,16)
+        elif  16 < len(key) < 24:
+            key=self.adjuster(key,24)
+        elif 24 < len(key) < 32:
+            key=self.adjuster(key,32)
         return key
     
     def encrypt(self,key,file,ofile):
@@ -52,10 +61,9 @@ class theCryptKeeper:
                 odata.write(plaintext)
                 counter+=1
 
-
 """
 keeper=theCryptKeeper()
-key=keeper.adjustKey("sixteen")
+key=keeper.adjustKey("sixteen   1234567 1234567")
 ec=keeper.encrypt(key,"tarball.tgz","t.tmp")
 keeper.decrypt(key,"t.tmp","tarball.tgz.tmp")
 """

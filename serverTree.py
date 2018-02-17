@@ -267,6 +267,7 @@ class run:
     compModes=['xz','gz','bz2']
     tarballMessage=''
     encrypt=''
+    decrypt=False
     def pathExpand(self,path):
         return os.path.realpath(os.path.expanduser(path))
 
@@ -333,6 +334,13 @@ class run:
             self.tarballMessage=color.message+"'{}' is using '{}' for compression.".format(self.zipName,self.tarball_compression)+color.end
             
     def main(self):
+        if self.decrypt == True:
+            pass
+            #decrypt archive
+            #need argparse options for
+            #infile
+            #outfile
+            #key
         if self.username == "":
             exit(color.errors+"username cannot be blank!"+color.end)
         if self.host == "":
@@ -343,14 +351,13 @@ class run:
             exit(color.errors+"src directory cannot be blank!"+color.end)
         if not 1 < self.port < 65535:
             exit(color.errors+"port must be within 1-65535!"+color.end)
-        
+         
         self.zipnameMod()
         if self.tarball == True:
             #would have put this later for better grouping, but since this is technically an error check
             #it would better be here
             self.checkTarballCompMode()
 
-        self.dstMod()
         #perform any necessary expansions 
         self.keyFile=self.pathExpand(self.keyFile)
         self.src=self.pathExpand(self.src)
@@ -376,7 +383,9 @@ class run:
                 key=ec.adjustKey(self.encrypt)
                 newZipName=self.zipName+".aes"
                 ec.encrypt(key,self.zipName,newZipName)
+                os.remove(self.zipName)
                 self.zipName=newZipName
+            self.dstMod()
             send=ssh()
             send.host=self.host
             send.forcePassword=self.forcePassword
@@ -407,6 +416,7 @@ class run:
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
+        parser.add_argument("--decrypt",action="store_true")
         options=parser.parse_args()
 
         if options.dst:
@@ -434,6 +444,9 @@ class run:
             self.password=options.password
         if options.encrypt_archive:
             self.encrypt=options.encrypt_archive
+        if options.decrypt:
+            self.decrypt=options.decrypt
+
         if options.force_password:
             self.forcePassword=options.force_password
         else:
