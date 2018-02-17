@@ -267,7 +267,7 @@ class run:
     compModes=['xz','gz','bz2']
     tarballMessage=''
     encrypt=''
-    decrypt=False
+    decrypt=''
     def pathExpand(self,path):
         return os.path.realpath(os.path.expanduser(path))
 
@@ -334,13 +334,15 @@ class run:
             self.tarballMessage=color.message+"'{}' is using '{}' for compression.".format(self.zipName,self.tarball_compression)+color.end
             
     def main(self):
-        if self.decrypt == True:
-            pass
-            #decrypt archive
-            #need argparse options for
-            #infile
-            #outfile
-            #key
+        if self.decrypt != '':
+            if os.path.exists(self.zipName):
+                cipher=tck()
+                key=cipher.adjustKey(self.decrypt)
+                cipher.decrypt(key,self.zipName,os.path.splitext(self.zipName)[0])
+                os.remove(self.zipName)
+                exit(color.start+"archive decrypted!"+color.end)
+            else:
+                exit(color.errors+"archive does not exist"+color.end)
         if self.username == "":
             exit(color.errors+"username cannot be blank!"+color.end)
         if self.host == "":
@@ -416,7 +418,7 @@ class run:
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
-        parser.add_argument("--decrypt",action="store_true")
+        parser.add_argument("--decrypt")
         options=parser.parse_args()
 
         if options.dst:
