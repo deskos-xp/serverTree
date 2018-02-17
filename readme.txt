@@ -1,3 +1,8 @@
+#aes encryption now provided
+
+-e,--encrypt-archive $password -> encrypts the archive before sending the data over the ssh connection with the .aes extension
+--decrypt $password -z $zipname -> will decrypt the archive provided by -z using the password provided to --decrypt
+
 #now contains the ability to tarball with xz, gz, and bz2.
 
 #paramiko uses an sftp/scp client to perform filetransfers 
