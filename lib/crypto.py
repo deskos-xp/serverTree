@@ -1,13 +1,9 @@
 #! /usr/bin/env python3
 import sys,os
 
-try:
-    #plugins
-    sys.path.insert(0,".")
-    import colors
-    color=colors.colors()
-except:
-    print("WARN: colors lib could not be imported")
+
+import colors
+color=colors.colors()
 
 from Crypto.Cipher import AES
 
