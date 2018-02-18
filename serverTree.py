@@ -37,6 +37,8 @@ class run:
     tarballMessage=''
     encrypt=''
     decrypt=''
+    delpromptYes=False
+    delpromptNo=False
     def pathExpand(self,path):
         return os.path.realpath(os.path.expanduser(path))
 
@@ -70,9 +72,14 @@ class run:
 
         ERR_FailToDelete=color.errors+"something went wrong and '{}' was not successfully deleted{}".format(self.zipName,color.end)
         if os.path.split(self.dst)[0] != self.pathExpand("."):
-            inputString=color.question+"do you wish to delete the generated "+archive+" in the current directory?"+color.end+" : "
-            user=input(inputString)
-            print(color.message+"="*len(inputString)+color.end)
+            if self.delpromptYes == True:
+                user='y'
+            elif self.delpromptNo == True:
+                user='n'
+            else:
+                inputString=color.question+"do you wish to delete the generated "+archive+" in the current directory?"+color.end+" : "
+                user=input(inputString)
+                print(color.message+"="*len(inputString)+color.end)
             while user not in breakStates:
                 stupidCounter+=1
                 if stupidCounter <= stupidTimeout:
@@ -94,7 +101,7 @@ class run:
                     print(ERR_FailToDelete)
                     exit(message)
             else:
-                print("{}user chose to keep the residual {}.{}".format(color.errors,archive,color.end))
+                print("{}user chose to keep the residual {}!{}".format(color.errors,archive,color.end))
     def checkTarballCompMode(self):
         if self.tarball_compression not in self.compModes:
             exit(color.errors+"'{}' not available for tarballing".format(self.tarball_compression)+color.end)
@@ -188,6 +195,8 @@ class run:
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
         parser.add_argument("--decrypt")
+        parser.add_argument("--delprompt-bypass-yes",action="store_true")
+        parser.add_argument("--delprompt-bypass-no",action="store_true")
         options=parser.parse_args()
 
         if options.dst:
@@ -222,6 +231,10 @@ class run:
             self.forcePassword=options.force_password
         else:
             self.forcePassword=None
+        if options.delprompt_bypass_yes:
+            self.delpromptYes=options.delprompt_bypass_yes
+        if options.delprompt_bypass_no:
+            self.delpromptNo=options.delprompt_bypass_no
 
 
 Run=run()

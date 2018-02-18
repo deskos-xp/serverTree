@@ -43,7 +43,8 @@ class ssh:
                 elif mode == "get":
                     sftp_client.get(src,dest,callback=self.printTotals)
                 else:
-                    print("invalid mode")
+                    exit("invalid mode")
+                print("-"*os.get_terminal_size().columns)
             else:
                 print("dest cannot be blank")
         else:
