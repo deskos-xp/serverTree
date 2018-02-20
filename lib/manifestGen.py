@@ -15,6 +15,7 @@ class docGen:
     manifest="manifest.xml"
     verbose=False
     integType="sha512"
+    supportedLFS=['ext4','ext3','btrfs','xfs']
     def integrity(self,fname):
         obj=hashlib.sha512()
         with open(fname,"rb") as file:
@@ -78,7 +79,7 @@ class docGen:
         stdout,err=data.communicate()
         fstype=subElement(node,"fstype")
         fstype.text=stdout.decode().rstrip("\n")
-
+        return fstype.text
 
     def genXml(self,dir='.'):
         path=os.path.realpath(dir)
@@ -128,9 +129,10 @@ class docGen:
                     permissions.text=self.getPermissions(fpath)
                     ftype=subElement(fsdata,"ftype")
                     ftype.text=self.getFileType(fpath)
-                    lsattr=subElement(fsdata,"lsattr")
-                    lsattr.text=self.lsAttr(fpath)
-                    self.getFSType(fpath,fsdata)
+                    fstype=self.getFSType(fpath,fsdata)
+                    if fstype in self.supportedLFS:
+                        lsattr=subElement(fsdata,"lsattr")
+                        lsattr.text=self.lsAttr(fpath)
                     self.lsAttr2(fpath,fsdata)
                     self.getfacl(fpath,fsdata)
                     #do file integreity check and record
