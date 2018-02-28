@@ -20,8 +20,16 @@ color=colors.colors()
 from ssh import ssh
 from manifestGen import docGen
 from archiveLib import zipUp
+from archiveLib import cpioShell 
+from depCheck import checkDep
 
 class run:
+    #do a depency checking run
+    dep=checkDep()
+    dep.getDeps()
+    dep.dep()
+    dep.determine()
+
     host="127.0.0.1"
     port=22
     username=""
@@ -32,6 +40,7 @@ class run:
     dst=""
     forcePassword=None
     tarball=False
+    cpio=False
     tarball_compression="gz"
     compModes=['xz','gz','bz2']
     tarballMessage=''
@@ -45,6 +54,8 @@ class run:
     def zipnameMod(self):
         if self.tarball == True:
             ext=".tar."+self.tarball_compression
+        elif self.cpio == True:
+            ext=".cpio"
         else:
             ext=".zip"
         if self.zipName == "":
@@ -67,6 +78,8 @@ class run:
         stupidTimeout=10
         if self.tarball == True:
             archive = "tarball"
+        elif self.cpio == True:
+            archive = "cpio-archive"
         else:
             archive = "zipfile"
 
@@ -151,6 +164,11 @@ class run:
                 tar.SRC=src
                 tar.tarbit()
                 print(self.tarballMessage)
+            elif self.cpio == True:
+                arch=cpioShell()
+                arch.oFile=self.zipName
+                arch.SRC=src
+                arch.createArchive() 
             else:
                 Zip=zipUp()
                 Zip.oPath=self.zipName
@@ -197,6 +215,7 @@ class run:
         parser.add_argument("--decrypt")
         parser.add_argument("--delprompt-bypass-yes",action="store_true")
         parser.add_argument("--delprompt-bypass-no",action="store_true")
+        parser.add_argument("-c","--cpio",action="store_true")
         options=parser.parse_args()
 
         if options.dst:
@@ -205,6 +224,8 @@ class run:
             self.tarball=options.tarball
             if options.tarball_compression:
                 self.tarball_compression=options.tarball_compression
+        elif options.cpio:
+            self.cpio=options.cpio
         if options.zipname:
             self.zipName=options.zipname
         if options.host:

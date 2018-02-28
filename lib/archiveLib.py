@@ -9,8 +9,8 @@ color=colors.colors()
 class cpioShell:
     fpaths=[]
     oFile='default.cpio'
-    DST='tmp'
-    SRC="./bcard"
+    SRC=""
+    DST=""
     manifest='manifest.xml'
     counterF=0
     counterD=0
@@ -19,7 +19,12 @@ class cpioShell:
             os.mkdir(self.DST)
         if not os.path.exists(os.path.join(self.DST,self.manifest)):
             shutil.copyfile(self.manifest,os.path.join(self.DST,self.manifest))
-        shutil.copytree(self.SRC,os.path.join(self.DST,os.path.split(self.SRC)[1]))
+        if os.path.exists(self.SRC):
+            if os.path.exists(os.path.join(self.DST,os.path.split(self.SRC)[1])):
+                shutil.rmtree(os.path.join(self.DST,os.path.split(self.SRC)[1]))
+            shutil.copytree(self.SRC,os.path.join(self.DST,os.path.split(self.SRC)[1]))
+        else:
+            exit("{}Source Dir{} {}'{}'{} does not {}exist{}".format(color.errors,color.end,color.stop,self.SRC,color.end,color.errors,color.end))
 
     def getFnames(self):
         #need a function that will auto-slash invalid chars for shell/bash
@@ -33,15 +38,16 @@ class cpioShell:
                     self.fpaths.append(path)
                     if os.path.isfile(path):
                         self.counterF+=1
-        msg="Files: {}\nDirectories: {}".format(self.counterF,self.counterD)
+        msg="{}Files{}: {}\n{}Directories{}: {}".format(color.message,color.end,self.counterF,color.message,color.end,self.counterD)
         print(msg)
 
     def createArchive(self):
+        self.DST=os.path.splitext(self.oFile)[0]
         self.prep()
         self.getFnames()
         if os.path.exists(self.oFile):
             msg="oFile '{}' exists... deleting!".format(self.oFile)
-            exit(msg)
+            print(msg)
             os.remove(self.oFile)
         if not os.path.exists(self.SRC):
             msg="SRC '{}' does not exist!"
@@ -51,6 +57,11 @@ class cpioShell:
         stdout,stderr=data.communicate()
         if stdout != b'':
             print(stdout)
+        self.cleanup()
+
+    def cleanup(self):
+        shutil.rmtree(self.DST)
+        os.remove(self.manifest)
 
     def extractArchive(self):
         cmd='cpio -id <'+self.ofile
@@ -61,6 +72,7 @@ class cpioShell:
         data=sp.Popen(cmd,shell=True,stdout=sp.PIPE)
         stdout,stderr=data.communicate()
         print(stdout)
+
 
 #critical
 '''
@@ -84,21 +96,20 @@ class tarball:
         if not os.path.exists(os.path.join(self.DST,self.manifest)):
             shutil.copyfile(self.manifest,os.path.join(self.DST,self.manifest))
             #if manifest does not exist generate it
+        if os.path.exists(self.SRC):
+            if os.path.exists(os.path.join(self.DST,os.path.split(self.SRC)[1])):
+                shutil.rmtree(os.path.join(self.DST,os.path.split(self.SRC)[1]))
+            shutil.copytree(self.SRC,os.path.join(self.DST,os.path.split(self.SRC)[1]))
+        else:
+            exit("Source Dir '{}' Does not Exist".format(self.SRC))
 
     def tarbit(self):
         self.prep()
-        if os.path.exists(self.SRC):
-            if not os.path.exists(os.path.join(self.DST,os.path.split(self.SRC)[1])):
-                shutil.copytree(self.SRC,os.path.join(self.DST,os.path.split(self.SRC)[1]))
-            else:
-                exit("Destination Dir '{}' Exists".format(self.DST))
-        else:
-            exit("Source Dir '{}' Does not Exist".format(self.SRC))
-        
+                
         try:
             tarry=tarfile.open(self.oPath,'w:'+self.compression)
             absolutePath=self.DST
-            relativePath=absolutePath.replace(self.DST,os.path.splitext(self.oPath)[0])
+            relativePath=absolutePath.replace(self.DST,os.path.splitext(os.path.splitext(self.oPath)[0])[0])
                         
             for root, dirname, fnames in os.walk(self.DST):
                 for fname in fnames:
@@ -107,7 +118,7 @@ class tarball:
                     else:
                         print(color.files+"file {} {}: {} added.".format(self.counter,color.end,fname))
                     absolutePath=os.path.join(root,fname)
-                    relativePath=absolutePath.replace(self.DST,os.path.splitext(self.oPath)[0])
+                    relativePath=absolutePath.replace(self.DST,os.path.splitext(os.path.splitext(self.oPath)[0])[0])
                     tarry.add(absolutePath,relativePath)
                     self.counter+=1
             print(color.message+"{} created successfully.{}".format(self.oPath,color.end))
@@ -135,17 +146,16 @@ class zipUp:
         if not os.path.exists(os.path.join(self.DST,self.manifest)):
             shutil.copyfile(self.manifest,os.path.join(self.DST,self.manifest))
             #if manifest does not exist generate it
+        if os.path.exists(self.SRC):
+            if os.path.exists(os.path.join(self.DST,os.path.split(self.SRC)[1])):
+                shutil.rmtree(os.path.join(self.DST,os.path.split(self.SRC)[1]))
+            shutil.copytree(self.SRC,os.path.join(self.DST,os.path.split(self.SRC)[1]))
+        else:
+            exit("Source Dir '{}' Does not Exist".format(self.SRC))
 
     def zipper(self):
         self.prep()
-        if os.path.exists(self.SRC):
-            if not os.path.exists(os.path.join(self.DST,os.path.split(self.SRC)[1])):
-                shutil.copytree(self.SRC,os.path.join(self.DST,os.path.split(self.SRC)[1]))
-            else:
-                exit("Destination Dir '{}' Exists".format(self.DST))
-        else:
-            exit("Source Dir '{}' Does not Exist".format(self.SRC))
-        
+                
         try:
             zippy=zipfile.ZipFile(self.oPath,'w',zipfile.ZIP_DEFLATED)
             for root, dirname, fnames in os.walk(self.DST):

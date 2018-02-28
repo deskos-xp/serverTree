@@ -98,7 +98,7 @@ class docGen:
                 fpath=os.path.join(root,fname)
                 if os.path.exists(fpath):
                     if self.verbose == True:
-                        print(color.start+fpath+color.end)
+                        print(color.start+'['+color.end+color.stop+'XML_Manifest_Gen'+color.end+color.start+"] "+color.end+color.start+fpath+color.end)
                     names=subElement(dirs,'file',num=str(counter),name=fname)
                     allocation=subElement(names,'allocation')
                     subNames=subElement(allocation,'fname')
