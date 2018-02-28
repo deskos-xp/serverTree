@@ -16,7 +16,8 @@ class checkDep:
             cfg=ET.parse(self.depCfg)
             root=cfg.getroot()
             for node in root:
-                self.depList.append(node.text)
+                if node.tag == 'dep':
+                    self.depList.append(node.text)
         else:
             exit(color.errors+"missing dep cfg '{}'".format(self.depcfg)+color.end)
 
