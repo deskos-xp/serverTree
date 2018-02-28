@@ -1,3 +1,6 @@
+#cpio archive format now added
+-c,--cpio
+
 #aes encryption now provided
 
 -e,--encrypt-archive $password -> encrypts the archive before sending the data over the ssh connection with the .aes extension
