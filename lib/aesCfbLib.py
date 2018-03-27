@@ -1,11 +1,9 @@
+#! /usr/bin/env python3
+#NoGuiLinux
+
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import os
-
-string="one two three"
-key='one two four    '
-iv=os.urandom(16)
-
 
 class aesCFB:
     key=b''
