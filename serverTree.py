@@ -22,7 +22,7 @@ from manifestGen import docGen
 from archiveLib import zipUp
 from archiveLib import cpioShell 
 from depCheck import checkDep
-
+import aesCfbLib
 class run:
     #do a depency checking run
     dep=checkDep()
@@ -48,6 +48,8 @@ class run:
     decrypt=''
     delpromptYes=False
     delpromptNo=False
+    emode='cbc'
+    DECRYPT_ERR=color.errors+"some internal error occurred, and '{}' could not be decrypted... please check your mode!"+color.end
     def pathExpand(self,path):
         return os.path.realpath(os.path.expanduser(path))
 
@@ -92,7 +94,7 @@ class run:
             else:
                 inputString=color.question+"do you wish to delete the generated "+archive+" in the current directory?"+color.end+" : "
                 user=input(inputString)
-                print(color.message+"="*len(inputString)+color.end)
+                print(color.message+"="*os.get_terminal_size().columns+color.end)
             while user not in breakStates:
                 stupidCounter+=1
                 if stupidCounter <= stupidTimeout:
@@ -125,10 +127,28 @@ class run:
     def main(self):
         if self.decrypt != '':
             if os.path.exists(self.zipName):
-                cipher=tck()
-                key=cipher.adjustKey(self.decrypt)
-                cipher.decrypt(key,self.zipName,os.path.splitext(self.zipName)[0])
-                os.remove(self.zipName)
+                if self.emode == 'cbc':
+                    try:
+                        cipher=tck()
+                        key=cipher.adjustKey(self.decrypt)
+                        cipher.decrypt(key,self.zipName,os.path.splitext(self.zipName)[0])
+                        os.remove(self.zipName)
+                    except:
+                        print(self.DECRYPT_ERR.format(self.zipName))
+                        if os.path.exists(os.path.splitext(self.zipName)[0]):
+                            os.remove(os.path.splitext(self.zipName)[0])
+                        exit(1)
+                elif self.emode == 'cfb':
+                    try:
+                        cipher=aesCfbLib.aesFile()
+                        cipher.key=self.decrypt
+                        cipher.decryptFile(self.zipName)
+                        os.remove(self.zipName)
+                    except:
+                        print(self.DECRYPT_ERR.format(self.zipName))
+                        if os.path.exists(os.path.splitext(self.zipName)[0]):
+                            os.remove(os.path.splitext(self.zipName)[0])
+                        exit(1)
                 exit(color.start+"archive decrypted!"+color.end)
             else:
                 exit(color.errors+"archive does not exist"+color.end)
@@ -175,10 +195,15 @@ class run:
                 Zip.SRC=src
                 Zip.zipper()
             if self.encrypt != '':
-                ec=tck()
-                key=ec.adjustKey(self.encrypt)
                 newZipName=self.zipName+".aes"
-                ec.encrypt(key,self.zipName,newZipName)
+                if self.emode == 'cbc':
+                    ec=tck()
+                    key=ec.adjustKey(self.encrypt)
+                    ec.encrypt(key,self.zipName,newZipName)
+                elif self.emode =='cfb':
+                    ec=aesCfbLib.aesFile()
+                    ec.key=self.encrypt
+                    ec.encryptFile(self.zipName)
                 os.remove(self.zipName)
                 self.zipName=newZipName
             self.dstMod()
@@ -212,6 +237,7 @@ class run:
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
+        parser.add_argument("--encrypt-mode",help="cfb or cbc")
         parser.add_argument("--decrypt")
         parser.add_argument("--delprompt-bypass-yes",action="store_true")
         parser.add_argument("--delprompt-bypass-no",action="store_true")
@@ -243,11 +269,17 @@ class run:
             self.username=options.username
         if options.password:
             self.password=options.password
+        
         if options.encrypt_archive:
             self.encrypt=options.encrypt_archive
+
+        if options.encrypt_mode:
+            self.emode=options.encrypt_mode
+        else:
+            self.emode="cbc"
+
         if options.decrypt:
             self.decrypt=options.decrypt
-
         if options.force_password:
             self.forcePassword=options.force_password
         else:
