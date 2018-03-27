@@ -5,6 +5,9 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import os
 
+#local import
+import colors
+
 class aesCFB:
     key=b''
     def fixKey(self):
@@ -43,7 +46,10 @@ class aesCFB:
 class aesFile:        
     key=b''
     block_size=128
+    ERR_FILE_NO_EXIST="that file does not exist: '{}'"
     def encryptFile(self,fname):
+        if not os.path.exists(fname):
+            exit(self.ERR_FILE_NO_EXIST.format(fname))
         cipher=aesCFB()
         cipher.key=self.key
         cipher.fixKey()
@@ -57,6 +63,8 @@ class aesFile:
         ofile.close()
 
     def decryptFile(self,fname):
+        if not os.path.exists(fname):
+            exit(self.ERR_FILE_NO_EXIST.format(fname))
         cipher=aesCFB()
         cipher.key=self.key
         cipher.fixKey()
