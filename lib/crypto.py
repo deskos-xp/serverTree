@@ -5,13 +5,15 @@ import sys,os
 import colors
 color=colors.colors()
 
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 
 class theCryptKeeper:
     def adjuster(self,key,charLen):
         keyLen=charLen-len(key)
         keyPad=chr(keyLen)
         key+=(keyLen*keyPad)
+        if type(key) == type(str()):
+            key=key.encode()
         return key
 
     def adjustKey(self,key):
@@ -24,7 +26,7 @@ class theCryptKeeper:
         return key
     
     def encrypt(self,key,file,ofile):
-        cipher=AES.new(key)
+        cipher=AES.new(key,AES.MODE_CBC)
         ciphertext=b''
         with open(file,'rb') as data, open(ofile,"wb") as odata:
             while True:
@@ -40,7 +42,7 @@ class theCryptKeeper:
     
     
     def decrypt(self,key,file,ofile):
-        cipher=AES.new(key)
+        cipher=AES.new(key,AES.MODE_CBC)
         plaintext=b''
         multi=int((os.stat(file).st_size/16)-1)
         counter=0

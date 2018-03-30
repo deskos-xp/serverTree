@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 #NoGuiLinux
 
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
+from Cryptodome.Cipher import AES
+from Cryptodome.Random import get_random_bytes
 import os
 
 #local import
