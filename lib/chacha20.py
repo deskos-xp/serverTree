@@ -1,4 +1,5 @@
-#change Crypto in serverTree to Cryptodome
+#! /usr/bin/env python3
+#NoGuiLinux
 from Cryptodome.Cipher import ChaCha20
 import os
 
