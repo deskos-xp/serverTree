@@ -72,3 +72,12 @@ NoGuiLinux
     </facl>
   </controls>
 </file>
+
+
+#encryption mode implementation now adds the --encrpt-mode option supporting three different modes of encryption
+#chacha20,cfb,cbc
+
+#here is an example of useage
+
+	python serverTree.py -u $USER -k ~/.ssh/id_rsa -d /home/carl/Downloads -s ~/Documents/resume --encrypt-mode chacha20 -e $PASSWORD
+	python serverTree.py --decrypt $PASSWORD --encrypt-mode chacha20 -z resume.zip.cc20
