@@ -2,13 +2,16 @@
 #NoGuiLinux
 from Cryptodome.Cipher import ChaCha20
 import os
+#local import
+import colors
 
-
+color=colors.colors()
 class chacha20:
     dataFile=''
     ext=".cc20"
     oDataFile=''
     key=''
+    FILE_NOT_EXIST="'{}' does not exist..."
 
     def mkOdataName(self):
         self.oDataFile=self.dataFile+self.ext
@@ -23,6 +26,8 @@ class chacha20:
     def encryptFile(self):
         self.mkOdataName()
         key=self.adjustKey(self.key)
+        if not os.path.exists(self.dataFile):
+            exit(color.errors+self.FILE_NOT_EXIST.format(self.dataFile)+color.end)
         with open(self.dataFile,'rb') as data, open(self.oDataFile,'wb') as odata:
             while True:
                 d=data.read(128)
@@ -36,6 +41,8 @@ class chacha20:
     def decryptFile(self):
         self.mkOdataName()
         key=self.adjustKey(self.key)
+        if not os.path.exists(self.oDataFile):
+            exit(color.errors+self.FILE_NOT_EXIST.format(self.oDataFile)+color.end)
         with open(self.oDataFile,'rb') as data, open(self.dataFile,'wb') as odata:
             while True:
                 d=data.read(128+8)

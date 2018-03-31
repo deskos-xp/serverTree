@@ -23,6 +23,8 @@ from archiveLib import zipUp
 from archiveLib import cpioShell 
 from depCheck import checkDep
 import aesCfbLib
+import chacha20
+
 class run:
     #do a depency checking run
     dep=checkDep()
@@ -125,6 +127,9 @@ class run:
             self.tarballMessage=color.message+"'{}' is using '{}' for compression.".format(self.zipName,self.tarball_compression)+color.end
             
     def main(self):
+        success=False
+        #temporary instantiation, since aes libs do not remove old files
+        AES_RUN=False
         if self.decrypt != '':
             if os.path.exists(self.zipName):
                 if self.emode == 'cbc':
@@ -133,6 +138,7 @@ class run:
                         key=cipher.adjustKey(self.decrypt)
                         cipher.decrypt(key,self.zipName,os.path.splitext(self.zipName)[0])
                         os.remove(self.zipName)
+                        success=True
                     except:
                         print(self.DECRYPT_ERR.format(self.zipName))
                         if os.path.exists(os.path.splitext(self.zipName)[0]):
@@ -144,12 +150,26 @@ class run:
                         cipher.key=self.decrypt
                         cipher.decryptFile(self.zipName)
                         os.remove(self.zipName)
+                        success=True
                     except:
                         print(self.DECRYPT_ERR.format(self.zipName))
                         if os.path.exists(os.path.splitext(self.zipName)[0]):
                             os.remove(os.path.splitext(self.zipName)[0])
                         exit(1)
-                exit(color.start+"archive decrypted!"+color.end)
+                elif self.emode == 'chacha20':
+                    try:
+                        cipher=chacha20.chacha20()
+                        cipher.dataFile=os.path.splitext(self.zipName)[0]
+                        cipher.key=self.decrypt
+                        cipher.decryptFile()
+                        success=True
+                    except:
+                        print(self.DECRYPT_ERR.format(self.zipName))
+                        if os.path.exists(os.path.splitext(self.zipName[0])):
+                            os.remove(os.path.splitext(self.zipName)[0])
+                        exit(1)
+                if success == True:
+                    exit(color.start+"archive decrypted!"+color.end)
             else:
                 exit(color.errors+"archive does not exist"+color.end)
         if self.username == "":
@@ -195,16 +215,27 @@ class run:
                 Zip.SRC=src
                 Zip.zipper()
             if self.encrypt != '':
-                newZipName=self.zipName+".aes"
                 if self.emode == 'cbc':
                     ec=tck()
                     key=ec.adjustKey(self.encrypt)
                     ec.encrypt(key,self.zipName,newZipName)
+                    newZipName=self.zipName+".aes"
+                    AES_RUN=True
                 elif self.emode =='cfb':
                     ec=aesCfbLib.aesFile()
                     ec.key=self.encrypt
                     ec.encryptFile(self.zipName)
-                os.remove(self.zipName)
+                    newZipName=self.zipName+".aes"
+                    AES_RUN=True
+                elif self.emode == 'chacha20':
+                    ec=chacha20.chacha20()
+                    ec.key=self.encrypt
+                    ec.dataFile=self.zipName
+                    ec.encryptFile()
+                    newZipName=ec.oDataFile
+                if AES_RUN == True:
+                    #this is run for modules that do not remove self.zipname automatically
+                    os.remove(self.zipName)
                 self.zipName=newZipName
             self.dstMod()
             send=ssh()
@@ -237,7 +268,7 @@ class run:
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
-        parser.add_argument("--encrypt-mode",help="cfb or cbc")
+        parser.add_argument("--encrypt-mode",help="cfb, cbc, or chacha20")
         parser.add_argument("--decrypt")
         parser.add_argument("--delprompt-bypass-yes",action="store_true")
         parser.add_argument("--delprompt-bypass-no",action="store_true")
