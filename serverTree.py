@@ -24,7 +24,7 @@ from archiveLib import cpioShell
 from depCheck import checkDep
 import aesCfbLib
 import chacha20
-
+import eLattice
 class run:
     #do a depency checking run
     dep=checkDep()
@@ -52,6 +52,7 @@ class run:
     delpromptNo=False
     emode='cbc'
     DECRYPT_ERR=color.errors+"some internal error occurred, and '{}' could not be decrypted... please check your mode!"+color.end
+    MODEUNSUPPORTED="'{}' : mode is unsupported"
     def pathExpand(self,path):
         return os.path.realpath(os.path.expanduser(path))
 
@@ -168,6 +169,19 @@ class run:
                         if os.path.exists(os.path.splitext(self.zipName[0])):
                             os.remove(os.path.splitext(self.zipName)[0])
                         exit(1)
+                elif self.emode == 'lattice':
+                    try:
+                        cipher=eLattice.modes()
+                        cipher.key=self.decrypt
+                        cipher.theLatticeD(self.zipName,os.path.splitext(self.zipName)[0])
+                        success=True
+                    except:
+                        print(self.DECRYPT_ERR.format(self.zipName))
+                        if os.path.exists(os.path.splitext(self.zipName[0])):
+                            os.remove(os.path.splitext(self.zipName)[0])
+                        exit(1)
+                else:
+                    exit(self.MODEUNSUPPORTED.format(self.emode))
                 if success == True:
                     exit(color.start+"archive decrypted!"+color.end)
             else:
@@ -233,6 +247,13 @@ class run:
                     ec.dataFile=self.zipName
                     ec.encryptFile()
                     newZipName=ec.oDataFile
+                elif self.emode == "lattice":
+                    newZipName=self.zipName+".lat"
+                    cipher=eLattice.modes()
+                    cipher.key=self.encrypt
+                    cipher.theLatticeE(self.zipName,newZipName)
+                else:
+                    exit(self.MODEUNSUPPORTED.format(self.emode))
                 if AES_RUN == True:
                     #this is run for modules that do not remove self.zipname automatically
                     os.remove(self.zipName)
@@ -268,7 +289,7 @@ class run:
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
-        parser.add_argument("--encrypt-mode",help="cfb, cbc, or chacha20")
+        parser.add_argument("--encrypt-mode",help="cfb, cbc, chacha20, or lattice")
         parser.add_argument("--decrypt")
         parser.add_argument("--delprompt-bypass-yes",action="store_true")
         parser.add_argument("--delprompt-bypass-no",action="store_true")

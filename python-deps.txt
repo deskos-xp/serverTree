@@ -1,5 +1,5 @@
 paramiko
-python3
-python-pyxattr
+pyxattr
+xattr
 pylibacl
 pycryptodome

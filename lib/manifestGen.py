@@ -55,7 +55,7 @@ class docGen:
         return out.decode().rstrip("\n")
 
     def lsAttr2(self,fname,node):
-        if len(xattr.list(fname)) > 0:
+        if len(xattr.listxattr(fname)) > 0:
             attr2Top=subElement(node,'getfattr')
             for xat in xattr.list(fname):
                 if xat != b"":
