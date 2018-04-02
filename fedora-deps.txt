@@ -1,0 +1,9 @@
+#install this packages
+	python3-paramiko
+	libacl-devel
+	libattr-devel
+	python3-cryptodome
+	redhat-rpm-config
+#remove these
+	python-gssapi
+	python3-gssapi
