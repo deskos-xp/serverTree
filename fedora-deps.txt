@@ -4,6 +4,7 @@
 	libattr-devel
 	python3-cryptodome
 	redhat-rpm-config
+	python3-devel
 #remove these
 	python-gssapi
 	python3-gssapi
