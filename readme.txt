@@ -75,7 +75,20 @@ NoGuiLinux
 
 
 #encryption mode implementation now adds the --encrpt-mode option supporting three different modes of encryption
-#chacha20,cfb,cbc
+#chacha20,cfb,cbc,lattice
+#lattice utilizes cfb and chacha20 in a double cascade
+#to decrypt lattice, you will either have develop your own tool to perform the decryption, or use my eLattice.py module, under lib/, which can be used as a standalone library, should you so choose for your own projects.
+
+think of lattice like the depiction below
+cc20=chacha20
+cfb=aes cfb mode
+
+==============
+cfb |cc20|cfb 
+==============
+cc20|cfb |cc20
+==============
+data|data|data
 
 #here is an example of useage
 
