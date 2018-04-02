@@ -4,8 +4,10 @@ import sys,os
 
 import colors
 color=colors.colors()
-
-from Cryptodome.Cipher import AES
+try:
+    from Cryptodome.Cipher import AES
+except:
+    from Crypto.Cipher import AES
 
 class theCryptKeeper:
     def adjuster(self,key,charLen):

@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 #NoGuiLinux
-from Cryptodome.Cipher import ChaCha20
+try:
+    from Cryptodome.Cipher import ChaCha20
+except:
+    from Crypto.Cipher import ChaCha20
 import os
 #local import
 import colors

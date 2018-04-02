@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 #NoGuiLinux
-from Cryptodome.Cipher import AES, ChaCha20
+try:
+    from Cryptodome.Cipher import AES, ChaCha20
+except:
+    from Crypto.Cipher import AES, ChaCha20
 import os
 
 class modes:

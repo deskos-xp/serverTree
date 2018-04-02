@@ -57,12 +57,12 @@ class docGen:
     def lsAttr2(self,fname,node):
         if len(xattr.listxattr(fname)) > 0:
             attr2Top=subElement(node,'getfattr')
-            for xat in xattr.list(fname):
-                if xat != b"":
+            for xat in xattr.listxattr(fname):
+                if xat != "":
                     attr2=subElement(attr2Top,'attr')
-                    attr2.text=xat.decode()
+                    attr2.text=xat
                     attr2Val=subElement(attr2Top,'value')
-                    attr2Val.text=xattr.get(fname,xat).decode()
+                    attr2Val.text=xattr.getxattr(fname,xat).decode()
         #this function will be used to get extended attributes as used by the setfattr command
 
     def getfacl(self,fname,node):
