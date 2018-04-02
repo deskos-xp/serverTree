@@ -1,3 +1,5 @@
+<strong>Backup directory files and their metadata, including xattrs, acls, and permissions. Think of it like rsync, but more like tar, or zip, plus scp with extra features.</strong>
+
 #cpio archive format now added
 -c,--cpio
 
