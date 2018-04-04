@@ -25,6 +25,7 @@ from depCheck import checkDep
 import aesCfbLib
 import chacha20
 import eLattice
+import capsule
 class run:
     #do a depency checking run
     dep=checkDep()
@@ -51,6 +52,7 @@ class run:
     delpromptYes=False
     delpromptNo=False
     emode='cbc'
+    keyPath=None
     DECRYPT_ERR=color.errors+"some internal error occurred, and '{}' could not be decrypted... please check your mode!"+color.end
     MODEUNSUPPORTED="'{}' : mode is unsupported"
     def pathExpand(self,path):
@@ -180,6 +182,27 @@ class run:
                         if os.path.exists(os.path.splitext(self.zipName[0])):
                             os.remove(os.path.splitext(self.zipName)[0])
                         exit(1)
+                elif self.emode == "capsule":
+                    try:
+                        cipher=capsule.capsule()
+                        cipher.oPath='.'
+                        if self.keyPath != None:
+                            cipher.keyPath=self.keyPath
+                        cipher.ifile=os.path.splitext(self.zipName)[0]
+                        cipher.userKey=self.decrypt
+                        cipher.block_size=4096
+                        try:
+                            cipher.decryptMain()
+                            success=True
+                        except OSError as err:
+                            print(err)
+                            exit(1)
+                    except OSError as err:
+                        print(err)
+                        print(self.DECRYPT_ERR.format(self.zipName))
+                        if os.path.exists(os.path.splitext(self.zipName)[0]):
+                            os.remove(os.path.splitext(self.zipName)[0])
+                        exit(1)
                 else:
                     exit(self.MODEUNSUPPORTED.format(self.emode))
                 if success == True:
@@ -252,6 +275,17 @@ class run:
                     cipher=eLattice.modes()
                     cipher.key=self.encrypt
                     cipher.theLatticeE(self.zipName,newZipName)
+                elif self.emode == "capsule":
+                    newZipName=self.zipName+".cap"
+                    cipher=capsule.capsule()
+                    cipher.oPath='.'
+                    if self.keyPath != None:
+                        cipher.keyPath=self.keyPath
+                    cipher.ifile=self.zipName
+                    cipher.userKey=self.encrypt
+                    cipher.block_size=4096
+                    cipher.encryptMain()
+                    ### ### ###
                 else:
                     exit(self.MODEUNSUPPORTED.format(self.emode))
                 if AES_RUN == True:
@@ -289,11 +323,12 @@ class run:
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
-        parser.add_argument("--encrypt-mode",help="cfb, cbc, chacha20, or lattice")
+        parser.add_argument("--encrypt-mode",help="cfb, cbc, chacha20, lattice, capsule")
         parser.add_argument("--decrypt")
         parser.add_argument("--delprompt-bypass-yes",action="store_true")
         parser.add_argument("--delprompt-bypass-no",action="store_true")
         parser.add_argument("-c","--cpio",action="store_true")
+        parser.add_argument("--key-path")
         options=parser.parse_args()
 
         if options.dst:
@@ -340,7 +375,8 @@ class run:
             self.delpromptYes=options.delprompt_bypass_yes
         if options.delprompt_bypass_no:
             self.delpromptNo=options.delprompt_bypass_no
-
+        if options.key_path:
+            self.keyPath=options.key_path
 
 Run=run()
 Run.cmdline()

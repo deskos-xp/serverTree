@@ -23,7 +23,7 @@ class capsule:
     ext='.cap'
     block_size=128
     db=''
-
+    keyPath='.'
     key=''
     NOTFILE="'{}' is not a file!"
     NOEXIST="'{}' does not exist!"
@@ -97,8 +97,8 @@ class capsule:
         return plaintext
     #need to write function to encrypt keyfile specifically
     def encKeyFile(self):
-        key=self.userKey
-        with open(self.keyFile,'rb') as idata, open(os.path.splitext(self.keyFile)[0]+".eke","wb") as odata:
+        self.key=self.userKey
+        with open(self.keyFile,'rb') as idata, open(os.path.join(self.keyPath,os.path.splitext(self.keyFile)[0]+".eke"),"wb") as odata:
             while True:
                 data=idata.read(self.block_size)
                 if not data:
@@ -107,8 +107,8 @@ class capsule:
         os.remove(self.keyFile)
     #need to write function to decrypt keyfile specifically
     def decKeyFile(self):
-        key=self.userKey
-        with open(os.path.splitext(self.keyFile)[0]+".eke","rb") as idata, open(self.keyFile,'wb') as odata:
+        self.key=self.userKey
+        with open(os.path.join(self.keyPath,os.path.splitext(self.keyFile)[0])+".eke","rb") as idata, open(self.keyFile,'wb') as odata:
             while True:
                 data=idata.read(self.block_size+16)
                 if not data:
@@ -142,12 +142,11 @@ class capsule:
         os.remove(self.ifile)
 
     def decryptMain(self):
+        self.mkOfile()
         #keyfile must be decrypted first
         self.decKeyFile()
         counter=1
-        self.mkOfile()
         self.db=self.DB(decrypt=True)
-        self.mkKeysTable()
         with open(self.ofile,'rb') as idata, open(self.ifile,'wb') as odata:
             while True:
                 data=idata.read(self.block_size+16)
