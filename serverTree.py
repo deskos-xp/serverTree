@@ -180,7 +180,11 @@ class run:
                     try:
                         cipher=eLattice.modes()
                         cipher.key=self.decrypt
-                        cipher.theLatticeD(self.zipName,os.path.splitext(self.zipName)[0])
+                        if self.zipPath != None:
+                            zipPath=os.path.join(self.zipPath,self.zipName)
+                            cipher.theLatticeD(zipPath,os.path.splitext(self.zipName)[0])
+                        else:
+                            cipher.theLatticeD(self.zipName,os.path.splitext(self.zipName)[0])
                         success=True
                     except:
                         print(self.DECRYPT_ERR.format(self.zipName))

@@ -1,5 +1,9 @@
-add opath to each lib/module
+add zipPath to each lib/module for decrypt mode only
+	done for:
+		lattice
+		capsule
 
+	
 combine useage of lattice and capsule
 
 create installation directions for fedora,debian,arch
