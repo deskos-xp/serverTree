@@ -1,0 +1,9 @@
+<resolv>
+ <install>
+  paramiko
+  pyxattr
+  xattr
+  pylibacl
+  pycryptodome
+ </install>
+</resolv>

@@ -1,0 +1,15 @@
+<resolv>
+ <install>
+  cpio      
+  python3-paramiko
+  libacl-devel
+  libattr-devel
+  python3-cryptodome
+  redhat-rpm-config
+  python3-devel
+ </install>
+ <remove>
+  python-gssapi
+  python3-gssapi
+ </remove>
+</resolv>

@@ -1,5 +1,0 @@
-paramiko
-pyxattr
-xattr
-pylibacl
-pycryptodome
