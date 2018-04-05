@@ -53,6 +53,7 @@ class run:
     delpromptNo=False
     emode='cbc'
     keyPath=None
+    zipPath=None
     DECRYPT_ERR=color.errors+"some internal error occurred, and '{}' could not be decrypted... please check your mode!"+color.end
     MODEUNSUPPORTED="'{}' : mode is unsupported"
     def pathExpand(self,path):
@@ -130,11 +131,15 @@ class run:
             self.tarballMessage=color.message+"'{}' is using '{}' for compression.".format(self.zipName,self.tarball_compression)+color.end
             
     def main(self):
+        if self.zipPath != None:
+            zipPath=self.zipPath
+        else:
+            zipPath='.'
         success=False
         #temporary instantiation, since aes libs do not remove old files
         AES_RUN=False
         if self.decrypt != '':
-            if os.path.exists(self.zipName):
+            if os.path.exists(os.path.join(zipPath,self.zipName)):
                 if self.emode == 'cbc':
                     try:
                         cipher=tck()
@@ -185,7 +190,8 @@ class run:
                 elif self.emode == "capsule":
                     try:
                         cipher=capsule.capsule()
-                        cipher.oPath='.'
+                        if self.zipPath != None:
+                            cipher.oPath=self.zipPath
                         if self.keyPath != None:
                             cipher.keyPath=self.keyPath
                         cipher.ifile=os.path.splitext(self.zipName)[0]
@@ -278,7 +284,8 @@ class run:
                 elif self.emode == "capsule":
                     newZipName=self.zipName+".cap"
                     cipher=capsule.capsule()
-                    cipher.oPath='.'
+                    if self.zipPath != None:
+                        cipher.oPath=self.zipPath
                     if self.keyPath != None:
                         cipher.keyPath=self.keyPath
                     cipher.ifile=self.zipName
@@ -329,6 +336,7 @@ class run:
         parser.add_argument("--delprompt-bypass-no",action="store_true")
         parser.add_argument("-c","--cpio",action="store_true")
         parser.add_argument("--key-path")
+        parser.add_argument("--zip-path")
         options=parser.parse_args()
 
         if options.dst:
@@ -377,7 +385,8 @@ class run:
             self.delpromptNo=options.delprompt_bypass_no
         if options.key_path:
             self.keyPath=options.key_path
-
+        if options.zip_path:
+            self.zipPath=options.zip_path
 Run=run()
 Run.cmdline()
 Run.main()

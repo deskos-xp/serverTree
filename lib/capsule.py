@@ -98,7 +98,8 @@ class capsule:
     #need to write function to encrypt keyfile specifically
     def encKeyFile(self):
         self.key=self.userKey
-        with open(self.keyFile,'rb') as idata, open(os.path.join(self.keyPath,os.path.splitext(self.keyFile)[0]+".eke"),"wb") as odata:
+        key=os.path.join(self.keyPath,os.path.splitext(self.keyFile)[0]+".eke")
+        with open(self.keyFile,'rb') as idata, open(key,"wb") as odata:
             while True:
                 data=idata.read(self.block_size)
                 if not data:
@@ -108,13 +109,14 @@ class capsule:
     #need to write function to decrypt keyfile specifically
     def decKeyFile(self):
         self.key=self.userKey
-        with open(os.path.join(self.keyPath,os.path.splitext(self.keyFile)[0])+".eke","rb") as idata, open(self.keyFile,'wb') as odata:
+        key=os.path.join(self.keyPath,os.path.split(os.path.splitext(self.keyFile)[0]+".eke")[1])
+        with open(key,"rb") as idata, open(self.keyFile,'wb') as odata:
             while True:
                 data=idata.read(self.block_size+16)
                 if not data:
                     break
                 odata.write(self.aesD(data))
-        os.remove(os.path.splitext(self.keyFile)[0]+'.eke')
+        os.remove(key)
 
     def encryptMain(self):
         counter=1

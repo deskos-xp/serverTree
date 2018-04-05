@@ -96,3 +96,8 @@ data|data|data
 
 	python serverTree.py -u $USER -k ~/.ssh/id_rsa -d /home/carl/Downloads -s ~/Documents/resume --encrypt-mode chacha20 -e $PASSWORD
 	python serverTree.py --decrypt $PASSWORD --encrypt-mode chacha20 -z resume.zip.cc20
+
+	
+	#please note that when the file is decrypted it will be decrypted to the current directory, the keyfile will be deleted, and the .cap version of the data file will be deleted from its destination directory
+	python3 serverTree.py -u carl -k ~/.ssh/id_rsa -s /home/carl/.ssh -d /home/carl/Downloads -z ssh-`hostname` -e avalon --encrypt-mode capsule
+	python3 serverTree.py --decrypt avalon --zip-path /home/carl/Downloads/ -z ssh-Krogue.zip.cap --encrypt-mode capsule --key-path . 
