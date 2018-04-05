@@ -1,0 +1,5 @@
+add opath to each lib/module
+
+combine useage of lattice and capsule
+
+create installation directions for fedora,debian,arch
