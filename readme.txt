@@ -1,4 +1,11 @@
 Backup directory files and their metadata, including xattrs, acls, and permissions. Think of it like rsync, but more like tar, or zip, plus scp with extra features
+#known to work on:
+Debian
+Ubuntu
+Fedora
+Arch Linux
+Manjaro Arch Linux
+
 
 #cpio archive format now added
 -c,--cpio

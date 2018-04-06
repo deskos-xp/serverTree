@@ -19,7 +19,7 @@ class checkDep:
                 if node.tag == 'dep':
                     self.depList.append(node.text)
         else:
-            exit(color.errors+"missing dep cfg '{}'".format(self.depcfg)+color.end)
+            exit(color.errors+"missing dep cfg '{}'".format(self.depCfg)+color.end)
 
     def dep(self):
         for dep in self.depList:
