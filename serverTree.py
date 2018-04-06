@@ -26,6 +26,8 @@ import aesCfbLib
 import chacha20
 import eLattice
 import capsule
+import latcap
+
 class run:
     #do a depency checking run
     dep=checkDep()
@@ -213,6 +215,20 @@ class run:
                         if os.path.exists(os.path.splitext(self.zipName)[0]):
                             os.remove(os.path.splitext(self.zipName)[0])
                         exit(1)
+                elif self.emode == "latcap":
+                    try:
+                        cipher=latcap.lc()
+                        cipher.ifileD=self.zipName
+                        cipher.key=self.decrypt
+                        cipher.decryptMain()
+                        success=True
+                    except OSError as err:
+                        print(err)
+                        print(self.DECRYPT_ERR.format(self.zipName))
+                        zipName=os.path.splitext(os.path.splitext(self.zipName)[0])[0]
+                        if os.path.exists(zipName):
+                            os.remove(zipName)
+                        exit(1)
                 else:
                     exit(self.MODEUNSUPPORTED.format(self.emode))
                 if success == True:
@@ -297,6 +313,12 @@ class run:
                     cipher.block_size=4096
                     cipher.encryptMain()
                     ### ### ###
+                elif self.emode == "latcap":
+                    newZipName=self.zipName+".lat.cap"
+                    cipher=latcap.lc()
+                    cipher.ifileE=self.zipName
+                    cipher.key=self.encrypt
+                    cipher.encryptMain()
                 else:
                     exit(self.MODEUNSUPPORTED.format(self.emode))
                 if AES_RUN == True:
@@ -334,7 +356,7 @@ class run:
         parser.add_argument("-t","--tarball",action="store_true")
         parser.add_argument("-m","--tarball-compression")
         parser.add_argument("-e","--encrypt-archive")
-        parser.add_argument("--encrypt-mode",help="cfb, cbc, chacha20, lattice, capsule")
+        parser.add_argument("--encrypt-mode",help="cfb, cbc, chacha20, lattice, capsule, latcap")
         parser.add_argument("--decrypt")
         parser.add_argument("--delprompt-bypass-yes",action="store_true")
         parser.add_argument("--delprompt-bypass-no",action="store_true")
