@@ -159,7 +159,7 @@ class capsule:
         self.db['db'].close()
         for file in decryptRm:
             os.remove(file)
-#'''
+'''
 #example useage code
 a=capsule()
 a.keyfile='smb.conf.key'
@@ -168,4 +168,4 @@ a.ofile='smb.conf.cap2'
 a.userKey='password 123'
 a.encryptMain()
 #a.decryptMain()
-#'''
+'''
