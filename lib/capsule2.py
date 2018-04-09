@@ -20,7 +20,7 @@ class capsule:
     db={}
     userKey=''
     keyfile_bs=256
-    blkSize=(128,8176)
+    blkSize=(1024,20480)
     badhmac="HMAC sums do not match! stored HMAC: {} | calculated HMAC: {}"
     nohmac="Warning! there is no HMAC available to test against"
     def DB(self):
