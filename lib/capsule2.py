@@ -21,7 +21,7 @@ class capsule:
     userKey=''
     keyfile_bs=256
     blkSize=(1024,20480)
-    badhmac="HMAC sums do not match! stored HMAC: {} | calculated HMAC: {}"
+    badhmac="HMAC sums do not match!\n    stored HMAC: {}\n calculated HMAC: {}"
     nohmac="Warning! there is no HMAC available to test against"
     def DB(self):
         db=sqlite3.connect(self.keyfile)
@@ -86,7 +86,7 @@ class capsule:
         cursor=self.db['cursor']
         sql='''
         insert into hmac (shasum) values ("{}");
-        '''.format(hmac)
+        '''.format(base64.b64encode(hmac).decode())
         cursor.execute(sql)
         db.commit()
     def getHMAC(self):
@@ -103,21 +103,24 @@ class capsule:
             result=result[0]
         return result
 
-    def verifyHMAC(self):
-        fhsum=self.generateHMAC()
-        rhsum=self.getHMAC()
+    def verifyHMAC(self,file,hsum=None):
+        fhsum=base64.b64encode(self.generateHMAC(file)).decode()
+        if hsum == None:
+            rhsum=self.getHMAC()
+        else:
+            rhsum=hsum
         if fhsum != rhsum:
             print(self.badhmac.format(fhsum,rhsum))
     
-    def generateHMAC(self):
+    def generateHMAC(self,file):
         hmac=HMAC.new(self.adjustKey(self.userKey),digestmod=SHA512)
-        with open(self.ofile,'rb') as idata:
+        with open(file,'rb') as idata:
             while True:
                 data=idata.read(self.keyfile_bs)
                 if not data:
                     break
                 hmac.update(data)
-        return hmac.hexdigest()
+        return hmac.digest()
 
     def encryptMain(self):
         counter=0
@@ -139,11 +142,23 @@ class capsule:
                 if ( counter % 100 ) == 0:
                     self.db['db'].commit()
                 counter+=1
-        hmac=self.generateHMAC()
+        hmac=self.generateHMAC(self.ofile)
         self.insertHMAC(hmac)
         self.db['db'].commit()
         self.db['db'].close()
         self.encryptKeyFile(self.keyfile)
+        
+        kfHmac=self.generateHMAC(os.path.splitext(self.keyfile)[0]+".eke")
+        with open(self.ofile,'rb') as idata, open(self.ofile+'.tmp','wb') as odata:
+            odata.write(kfHmac)
+            while True:
+                data=idata.read(8176)
+                if not data:
+                    break
+                odata.write(data)
+        os.remove(self.ofile)
+        os.rename(self.ofile+".tmp",self.ofile)
+        
         for file in encryptRm:
             os.remove(file)
 
@@ -183,12 +198,25 @@ class capsule:
 
     def decryptMain(self):
         decryptRm=[self.ofile,self.keyfile]
+        #get the keyfile hmac and verify it
+        kfHmac=b''
+        with open(self.ofile,'rb') as idata, open(self.ofile+".tmp",'wb') as odata:
+            kfHmac=idata.read(64)
+            while True:
+                data=idata.read(8176)
+                if not data:
+                    break
+                odata.write(data)
+        os.remove(self.ofile)
+        os.rename(self.ofile+".tmp",self.ofile)
+        self.verifyHMAC(os.path.splitext(self.keyfile)[0]+".eke",base64.b64encode(kfHmac).decode())
+        #begin remainder of decryption run
         self.decryptKeyFile(os.path.splitext(self.keyfile)[0]+".eke")
-        self.DB()
-        self.verifyHMAC()
+        self.DB() 
         rows=self.getRows()
         db=self.db['db']
         cursor=self.db['cursor']
+        self.verifyHMAC(self.ofile)
         counter=1
         if rows != None:
             rows=rows[0]
@@ -230,8 +258,14 @@ def main():
         a.ofile=a.ifile+datExt
         a.userKey=sys.argv[1]
         if sys.argv[3] == 'e':
+            if not os.path.exists(a.ifile):
+                exit("file does not exist: '{}'".format(a.ifile))
             a.encryptMain()
         elif sys.argv[3] == 'd':
+            if not os.path.exists(a.ofile):
+                exit("data file does not exist: '{}'".format(a.ofile))
+            if not os.path.exists(os.path.splitext(a.keyfile)[0]+".eke"):
+                exit("key file does not exist: '{}'".format(os.path.splitext(a.keyfile)[0]+'.eke'))
             a.decryptMain()
         else:
             print(helper)
