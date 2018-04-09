@@ -74,6 +74,7 @@ class capsule:
         os.remove(keyfile)
 
     def encryptMain(self):
+        counter=0
         encryptRm=[self.ifile]
         if os.path.exists(self.keyfile):
             os.remove(self.keyfile)
@@ -89,6 +90,9 @@ class capsule:
                 d=self.aesE(block['key'],data)
                 self.insertValues(block['key'].decode(),len(d))
                 odata.write(d)
+                if ( counter % 100 ) == 0:
+                    self.db['db'].commit()
+                counter+=1
         self.db['db'].commit()
         self.db['db'].close()
         self.encryptKeyFile(self.keyfile)
@@ -155,7 +159,7 @@ class capsule:
         self.db['db'].close()
         for file in decryptRm:
             os.remove(file)
-'''
+#'''
 #example useage code
 a=capsule()
 a.keyfile='smb.conf.key'
@@ -163,5 +167,5 @@ a.ifile='smb.conf'
 a.ofile='smb.conf.cap2'
 a.userKey='password 123'
 a.encryptMain()
-a.decryptMain()
-'''
+#a.decryptMain()
+#'''
