@@ -1,15 +1,17 @@
 #! /usr/bin/env python3
 #NoGuiLinux
-
+import sys
 #like the orginal capsule, but with a bit of a change
 #encrypted block sizes are NOT static, their sizes are stored in the keyfile with their corresponding keys
 try:
     from Cryptodome.Cipher import AES
+    from Cryptodome.Hash import HMAC,SHA512
 except:
     from Crypto.Cipher import AES
+    from Crypto.Hash import HMAC,SHA512
 
 import sqlite3,os,base64
-import random
+import random,hashlib
 
 class capsule:
     ifile=''
@@ -19,6 +21,8 @@ class capsule:
     userKey=''
     keyfile_bs=256
     blkSize=(128,8176)
+    badhmac="HMAC sums do not match! stored HMAC: {} | calculated HMAC: {}"
+    nohmac="Warning! there is no HMAC available to test against"
     def DB(self):
         db=sqlite3.connect(self.keyfile)
         cursor=db.cursor()
@@ -30,6 +34,10 @@ class capsule:
         sql='''
         create table if not exists
         keys ( key text, blockSize text,rowid INTEGER PRIMARY KEY AUTOINCREMENT );
+        '''
+        cursor.execute(sql)
+        sql='''
+        create table if not exists hmac ( shasum text, rowid INTEGER PRIMARY KEY AUTOINCREMENT );
         '''
         cursor.execute(sql)
         db.commit()
@@ -72,6 +80,44 @@ class capsule:
                 key=base64.b64encode(self.adjustKey(self.userKey))
                 odata.write(self.aesE(key,data))
         os.remove(keyfile)
+    
+    def insertHMAC(self,hmac):
+        db=self.db['db']
+        cursor=self.db['cursor']
+        sql='''
+        insert into hmac (shasum) values ("{}");
+        '''.format(hmac)
+        cursor.execute(sql)
+        db.commit()
+    def getHMAC(self):
+        db=self.db['db']
+        cursor=self.db['cursor']
+        sql='''
+        select shasum from hmac where rowid=1;
+        '''
+        cursor.execute(sql)
+        result=cursor.fetchone()
+        if result == None:
+            print(self.nohmac)
+        else:
+            result=result[0]
+        return result
+
+    def verifyHMAC(self):
+        fhsum=self.generateHMAC()
+        rhsum=self.getHMAC()
+        if fhsum != rhsum:
+            print(self.badhmac.format(fhsum,rhsum))
+    
+    def generateHMAC(self):
+        hmac=HMAC.new(self.adjustKey(self.userKey),digestmod=SHA512)
+        with open(self.ofile,'rb') as idata:
+            while True:
+                data=idata.read(self.keyfile_bs)
+                if not data:
+                    break
+                hmac.update(data)
+        return hmac.hexdigest()
 
     def encryptMain(self):
         counter=0
@@ -93,11 +139,14 @@ class capsule:
                 if ( counter % 100 ) == 0:
                     self.db['db'].commit()
                 counter+=1
+        hmac=self.generateHMAC()
+        self.insertHMAC(hmac)
         self.db['db'].commit()
         self.db['db'].close()
         self.encryptKeyFile(self.keyfile)
         for file in encryptRm:
             os.remove(file)
+
 
     def getRows(self):
         db=self.db['db']
@@ -136,6 +185,7 @@ class capsule:
         decryptRm=[self.ofile,self.keyfile]
         self.decryptKeyFile(os.path.splitext(self.keyfile)[0]+".eke")
         self.DB()
+        self.verifyHMAC()
         rows=self.getRows()
         db=self.db['db']
         cursor=self.db['cursor']
@@ -159,13 +209,35 @@ class capsule:
         self.db['db'].close()
         for file in decryptRm:
             os.remove(file)
-'''
-#example useage code
-a=capsule()
-a.keyfile='smb.conf.key'
-a.ifile='smb.conf'
-a.ofile='smb.conf.cap2'
-a.userKey='password 123'
-a.encryptMain()
-#a.decryptMain()
-'''
+
+
+
+#'''
+def main():
+    #example useage code
+    helper='''
+        ./capsule2.py $password $infile $mode
+        $mode:
+            e - encrypt
+            d - decrypt
+        '''
+    if len(sys.argv) == 4:
+        a=capsule()
+        datExt='.ap2'
+        keyExt='.key'
+        a.ifile=sys.argv[2]
+        a.keyfile=a.ifile+keyExt
+        a.ofile=a.ifile+datExt
+        a.userKey=sys.argv[1]
+        if sys.argv[3] == 'e':
+            a.encryptMain()
+        elif sys.argv[3] == 'd':
+            a.decryptMain()
+        else:
+            print(helper)
+    else:
+        print(helper)
+
+if __name__ == '__main__':
+    main()
+#'''
