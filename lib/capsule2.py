@@ -238,30 +238,27 @@ class capsule:
         for file in decryptRm:
             os.remove(file)
 
-
-
-#'''
-def main():
-    #example useage code
-    helper='''
+class accessMethods:
+    def mainLibAccess(self,infile,userKey,mode):
+        #example useage code #1
+        helper='''
         ./capsule2.py $password $infile $mode
         $mode:
             e - encrypt
             d - decrypt
         '''
-    if len(sys.argv) == 4:
         a=capsule()
         datExt='.ap2'
         keyExt='.key'
         a.ifile=sys.argv[2]
-        a.keyfile=a.ifile+keyExt
-        a.ofile=a.ifile+datExt
+        a.keyfile=infile+keyExt
+        a.ofile=infile+datExt
         a.userKey=sys.argv[1]
-        if sys.argv[3] == 'e':
+        if mode == 'e':
             if not os.path.exists(a.ifile):
                 exit("file does not exist: '{}'".format(a.ifile))
             a.encryptMain()
-        elif sys.argv[3] == 'd':
+        elif mode == 'd':
             if not os.path.exists(a.ofile):
                 exit("data file does not exist: '{}'".format(a.ofile))
             if not os.path.exists(os.path.splitext(a.keyfile)[0]+".eke"):
@@ -269,9 +266,42 @@ def main():
             a.decryptMain()
         else:
             print(helper)
-    else:
-        print(helper)
+
+
+
+#'''
+    def mainUtility(self):
+        #example useage code
+        helper='''
+        ./capsule2.py $password $infile $mode
+        $mode:
+            e - encrypt
+            d - decrypt
+        '''
+        if len(sys.argv) == 4:
+            a=capsule()
+            datExt='.ap2'
+            keyExt='.key'
+            a.ifile=sys.argv[2]
+            a.keyfile=a.ifile+keyExt
+            a.ofile=a.ifile+datExt
+            a.userKey=sys.argv[1]
+            if sys.argv[3] == 'e':
+                if not os.path.exists(a.ifile):
+                    exit("file does not exist: '{}'".format(a.ifile))
+                a.encryptMain()
+            elif sys.argv[3] == 'd':
+                if not os.path.exists(a.ofile):
+                    exit("data file does not exist: '{}'".format(a.ofile))
+                if not os.path.exists(os.path.splitext(a.keyfile)[0]+".eke"):
+                    exit("key file does not exist: '{}'".format(os.path.splitext(a.keyfile)[0]+'.eke'))
+                a.decryptMain()
+            else:
+                print(helper)
+        else:
+            print(helper)
 
 if __name__ == '__main__':
-    main()
+    access=accessMethods()
+    access.mainUtility()
 #'''
