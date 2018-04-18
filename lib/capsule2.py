@@ -250,10 +250,10 @@ class accessMethods:
         a=capsule()
         datExt='.ap2'
         keyExt='.key'
-        a.ifile=sys.argv[2]
+        a.ifile=infile
         a.keyfile=infile+keyExt
         a.ofile=infile+datExt
-        a.userKey=sys.argv[1]
+        a.userKey=userKey
         if mode == 'e':
             if not os.path.exists(a.ifile):
                 exit("file does not exist: '{}'".format(a.ifile))
@@ -304,4 +304,5 @@ class accessMethods:
 if __name__ == '__main__':
     access=accessMethods()
     access.mainUtility()
+    #access.mainLibAccess('/home/carl/Documents/test.tar.xz','avalon','e')
 #'''
