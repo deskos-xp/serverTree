@@ -1,6 +1,11 @@
 #! /usr/bin/env python3
 #NoGuiLinux
 import sys
+
+#add an option to specify keyfile independent of default option, where
+#keyfile is chosen based off of file name, and allow path to be included, so a wide path can difference
+#can be used
+
 #like the orginal capsule, but with a bit of a change
 #encrypted block sizes are NOT static, their sizes are stored in the keyfile with their corresponding keys
 try:
