@@ -107,4 +107,6 @@ data|data|data
 	
 	#please note that when the file is decrypted it will be decrypted to the current directory, the keyfile will be deleted, and the .cap version of the data file will be deleted from its destination directory
 	python3 serverTree.py -u carl -k ~/.ssh/id_rsa -s /home/carl/.ssh -d /home/carl/Downloads -z ssh-`hostname` -e avalon --encrypt-mode capsule
-	python3 serverTree.py --decrypt avalon --zip-path /home/carl/Downloads/ -z ssh-Krogue.zip.cap --encrypt-mode capsule --key-path . 
+	python3 serverTree.py --decrypt avalon --zip-path /home/carl/Downloads/ -z ssh-Krogue.zip.cap --encrypt-mode capsule --key-path .
+
+capsule2.py is more of a utility than a lib, but can  be used as one. see its help page... capsule2.py's cmdline interface has been revamped with argparse, for more more complex, more flexible operations. 
